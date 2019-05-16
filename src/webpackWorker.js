@@ -89,6 +89,7 @@ module.exports = function(configuratorFileName, options, index, expectedConfigLe
     }
     Promise.resolve(config).then(function(webpackConfig) {
         var watcher,
+            outStats = '',
             webpack = getWebpack(),
             hasCompletedOneCompile = false,
             outputOptions = getOutputOptions(webpackConfig, options),
@@ -117,9 +118,16 @@ module.exports = function(configuratorFileName, options, index, expectedConfigLe
                         console.log(message);
                     } else {
                         process.removeListener('SIGINT', shutdownCallback);
+
+                        try {
+                            outStats = JSON.stringify(stats.toJson(outputOptions), null, 2);
+                        } catch (err) {
+                            console.log('%s Failed to format stats for %s: %s', chalk.yellow('[WEBPACK]'), chalk.yellow(getAppName(webpackConfig)), err.message);
+                        }
+
                         return done({
                             message: message,
-                            stats: JSON.stringify(stats.toJson(outputOptions), null, 2)
+                            stats: outStats
                         });
                     }
                 }
@@ -134,7 +142,16 @@ module.exports = function(configuratorFileName, options, index, expectedConfigLe
                 }
                 if(!watch) {
                     process.removeListener('SIGINT', shutdownCallback);
-                    done(null, options.stats ? JSON.stringify(stats.toJson(outputOptions), null, 2) : '');
+
+                    if (options.stats) {
+                        try {
+                            outStats = JSON.stringify(stats.toJson(outputOptions), null, 2);
+                        } catch (err) {
+                            console.log('%s Failed to format stats for %s', chalk.yellow('[WEBPACK]'), chalk.yellow(getAppName(webpackConfig)), err.message);
+                        }
+                    }
+
+                    done(null, outStats);
                 } else if (!hasCompletedOneCompile) {
                     notifyIPCWatchCompileDone(index);
                     hasCompletedOneCompile = true;
