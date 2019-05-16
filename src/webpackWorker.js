@@ -147,7 +147,7 @@ module.exports = function(configuratorFileName, options, index, expectedConfigLe
                         try {
                             outStats = JSON.stringify(stats.toJson(outputOptions), null, 2);
                         } catch (err) {
-                            console.log('%s Failed to format stats for %s', chalk.yellow('[WEBPACK]'), chalk.yellow(getAppName(webpackConfig)), err.message);
+                            console.log('%s Failed to format stats for %s: %s', chalk.yellow('[WEBPACK]'), chalk.yellow(getAppName(webpackConfig)), err.message);
                         }
                     }
 
